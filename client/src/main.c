@@ -7,13 +7,27 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#include "util.h"
+
+#define DEFAULT_PORT     6000
+#define DEFAULT_ADDRESS "127.0.0.1"
+
 char message[] = "Hello there!\n";
 char buf[sizeof(message)];
 
-int main()
+int get_port(int argc, char *argv[]);
+void set_address(int argc, char *argv[], char *destination, size_t len);
+
+int main(int argc, char *argv[])
 {
     int sock;
     struct sockaddr_in addr;
+    int port = get_port(argc, argv);
+    char server_address_string[16];
+    set_address(argc, argv, server_address_string, LENGTH_OF(server_address_string));
+
+    printf(" %s:%d\n",
+            server_address_string, port);
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if(sock < 0) {
@@ -22,8 +36,9 @@ int main()
     }
 
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(strtol(argv[1]));
-    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    addr.sin_port = htons(port);
+    /* addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK); */
+    addr.sin_addr.s_addr = inet_addr(server_address_string);
     if(connect(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
         perror("connect");
         exit(2);
@@ -32,8 +47,27 @@ int main()
     send(sock, message, sizeof(message), 0);
     recv(sock, buf, sizeof(message), 0);
 
-    printf(buf);
+    /* printf(buf); */
     close(sock);
 
     return 0;
 }
+
+void set_address(int argc, char *argv[], char *destination, size_t len)
+{
+    if(argc >= 2) {
+        strncpy(destination, argv[1], len);
+    } else {
+        strncpy(destination, DEFAULT_ADDRESS, len);
+    }
+}
+
+int get_port(int argc, char *argv[])
+{
+    if(argc >= 3) {
+        return strtol(argv[1], NULL, 10);
+    } else {
+        return DEFAULT_PORT;
+    }
+}
+

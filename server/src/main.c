@@ -10,6 +10,9 @@
 #include "util.h"
 #include "tui.h"
 
+#define DEFAULT_PORT 6000
+#define DEFAULT_ADDRESS "127.0.0.1"
+
 #define SOC_ERR -1
 #define SERV_QUEUE_LEN 1
 #define BUF_SIZE 1024
@@ -69,7 +72,7 @@ int main(int argc, char *argv[])
             exit(EXIT_FAILURE);
         }
 
-        while(1) {
+        while(true) {
             bytes_read = recv(client_fd, buf, BUF_SIZE, EMPTY_FLAGS);
             if(bytes_read <= 0) break;
             send(client_fd, buf, bytes_read, EMPTY_FLAGS);
@@ -86,7 +89,7 @@ void set_address(int argc, char *argv[], char *destination, size_t len)
     if(argc >= 2) {
         strncpy(destination, argv[1], len);
     } else {
-        strncpy(destination, "localhost", len);
+        strncpy(destination, DEFAULT_ADDRESS, len);
     }
 }
 
@@ -95,7 +98,7 @@ int get_port(int argc, char *argv[])
     if(argc >= 3) {
         return strtol(argv[1], NULL, 10);
     } else {
-        return 6000;
+        return DEFAULT_PORT;
     }
 }
 
