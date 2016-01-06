@@ -7,13 +7,15 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-
 #include "util.h"
 #include "tui.h"
 
 #define SOC_ERR -1
 #define SERV_PORT 5555
 #define SERV_QUEUE_LEN 1
+#define BUF_SIZE 1024
+#define WONG_SOC(soc_fd) (soc_fd < 0)
+#define EMPTY_FLAGS 0
 
 typedef int socket_t;
 typedef struct sockaddr_in sockaddr_in_t;
@@ -23,7 +25,9 @@ int main(int argc, char *argv[])
 {
     socket_t server_fd, client_fd;
     sockaddr_in_t server_address;
-    char buf[1024];
+    unsigned int bytes_read;
+
+    char buf[BUF_SIZE];
 
 
     // AF_INET: IPv4 internet protocols,
@@ -47,15 +51,23 @@ int main(int argc, char *argv[])
     server_address.sin_port = htons(SERV_PORT);
     bind(server_fd, (sockaddr_t *) &server_address, sizeof(sockaddr_in_t));
 
+    // Create requests queue, suspend socket
     listen(server_fd, SERV_QUEUE_LEN);
 
     while (true) {
         // $2: client_addr, $3: client_addr_len
         client_fd = accept(server_fd, (sockaddr_t *) 0, NULL);
-        printf("123\n");
-        if(write(client_fd, "123", 3) == -1) {
-            perror("asd");
+        if(WRONG_SOC(client_fd)) {
+            perrror("accept");
+            exit(EXIT_FAILURE);
         }
+
+        while(1) {
+            bytes_read = recv(client_fd, buf, BUF_SIZE, EMPTY_FLAGS);
+            if(bytes_read <= 0) break;
+            send(client_sock, buf, bytes_read, EMPTY_FLAGS);
+        }
+
         close(client_fd);
     }
 
