@@ -21,6 +21,7 @@ void set_address(int argc, char *argv[], char *destination, size_t len);
 int main(int argc, char *argv[])
 {
     int sock;
+    unsigned int bytes_read;
     struct sockaddr_in addr;
     int port = get_port(argc, argv);
     char server_address_string[16];
@@ -46,13 +47,15 @@ int main(int argc, char *argv[])
     }
 
     while(true) {
+        printf("-> ");
         read_stdin(buf, LENGTH_OF(buf));
         if(!strncmp(buf, "exit", LENGTH_OF(buf))) {
             break;
         }
         send(sock, buf, strlen(buf), 0);
-        recv(sock, buf, strlen(buf), 0);
-        puts(buf);
+        bytes_read = recv(sock, buf, LENGTH_OF(buf), 0);
+        buf[bytes_read] = '\0';
+        printf("<- %s", buf);
     }
 
     /* printf(buf); */
