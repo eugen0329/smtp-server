@@ -21,6 +21,7 @@
 #define WRONG_SOC(soc_fd) (soc_fd < 0)
 #define EMPTY_FLAGS 0
 #define UNKNOWN_COMMAND_ERR "Unknown command"
+#define EMPTY_ECHO_ERR "Empty echo string"
 
 typedef int socket_t;
 typedef struct sockaddr_in sockaddr_in_t;
@@ -89,7 +90,7 @@ int main(int argc, char *argv[])
             printf("<- %s\n", buf);
             if(!strncmp(buf, "time", LENGTH_OF(buf))) {
                 server_time_route(client_fd, buf, bytes_read);
-            } else if(!strncmp(buf, "echo", LENGTH_OF(buf))) {
+            } else if(strstr(buf, "echo")) {
                 echo_route(client_fd, buf, bytes_read);
             } else {
                 error_route(client_fd, buf, bytes_read);
@@ -106,6 +107,15 @@ int main(int argc, char *argv[])
 
 void echo_route(int client_fd, char *buf, size_t bytes_read)
 {
+    char *p = strstr(buf, "echo");
+    p += LENGTH_OF("echo") - 1;
+    if(strlen(p)) {
+        printf("-> %s (%zu bytes)", p, strlen(p));
+        send(client_fd, p, strlen(p), EMPTY_FLAGS);
+    } else {
+        printf("-> %s (%zu bytes)", EMPTY_ECHO_ERR, sizeof(EMPTY_ECHO_ERR));
+        send(client_fd, EMPTY_ECHO_ERR, strlen(EMPTY_ECHO_ERR), EMPTY_FLAGS);
+    }
 }
 
 void error_route(int client_fd, char *buf, size_t bytes_read)
