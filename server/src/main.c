@@ -31,9 +31,9 @@ void set_address(int argc, char *argv[], char *destination, size_t len);
 char * server_time();
 
 
-void server_time_route(int client_fd);
-void error_route(int client_fd);
-void echo_route(int client_fd);
+void server_time_route(int client_fd, char *buf, size_t bytes_read);
+void error_route(int client_fd, char *buf, size_t bytes_read);
+void echo_route(int client_fd, char *buf, size_t bytes_read);
 
 int main(int argc, char *argv[])
 {
@@ -88,12 +88,13 @@ int main(int argc, char *argv[])
 
             printf("<- %s\n", buf);
             if(!strncmp(buf, "time", LENGTH_OF(buf))) {
-                server_time_route(client_fd);
+                server_time_route(client_fd, buf, bytes_read);
             } else if(!strncmp(buf, "echo", LENGTH_OF(buf))) {
-                echo_route(client_fd);
+                echo_route(client_fd, buf, bytes_read);
             } else {
-                error_route(client_fd);
+                error_route(client_fd, buf, bytes_read);
             }
+            puts("");
         }
 
         close(client_fd);
@@ -103,21 +104,22 @@ int main(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
-void echo_route(int client_fd)
+void echo_route(int client_fd, char *buf, size_t bytes_read)
 {
 }
 
-void error_route(int client_fd)
+void error_route(int client_fd, char *buf, size_t bytes_read)
 {
-    printf("-> %s\n", UNKNOWN_COMMAND_ERR);
+    printf("-> %s (%zu bytes)", UNKNOWN_COMMAND_ERR, sizeof(UNKNOWN_COMMAND_ERR));
     send(client_fd, UNKNOWN_COMMAND_ERR, strlen(UNKNOWN_COMMAND_ERR), EMPTY_FLAGS);
 }
 
-void server_time_route(int client_fd)
+void server_time_route(int client_fd, char *buf, size_t bytes_read)
 {
     char *time_str;
     time_str = server_time();
-    printf("-> %s\n", time_str);
+    time_str[strlen(time_str) - 1] = '\0';
+    printf("-> %s (%zu bytes)", time_str, strlen(time_str));
     send(client_fd, time_str, strlen(time_str), EMPTY_FLAGS);
 }
 
@@ -145,4 +147,4 @@ char * server_time()
     current_time = time(&current_time);
     return ctime(&current_time);
 }
-/* printf(" --- %d bytes read\n", bytes_read); */
+/* printf(" --- %d bytes read\n", buffer, bytes_read); */
