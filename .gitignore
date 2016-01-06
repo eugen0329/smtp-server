@@ -1,4 +1,5 @@
-bin
+server/server
+client/client
 */obj/*
 
 CMakeCache.txt

@@ -3,7 +3,7 @@ project(tcp_server)
 
 include_directories(../shared)
 
-set(TARGET_NAME "bin")
+set(TARGET_NAME "server")
 
 file(GLOB_RECURSE SRC_NAMES src/*.c)
 file(GLOB_RECURSE SHARED_SRC_NAMES ../shared/*.c)

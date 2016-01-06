@@ -11,7 +11,6 @@
 #include "tui.h"
 
 #define SOC_ERR -1
-#define SERV_PORT 5555
 #define SERV_QUEUE_LEN 1
 #define BUF_SIZE 1024
 #define WRONG_SOC(soc_fd) (soc_fd < 0)
@@ -21,14 +20,21 @@ typedef int socket_t;
 typedef struct sockaddr_in sockaddr_in_t;
 typedef struct sockaddr sockaddr_t;
 
+int get_port(int argc, char *argv[]);
+void set_address(int argc, char *argv[], char *destination, size_t len);
+
 int main(int argc, char *argv[])
 {
     socket_t server_fd, client_fd;
     sockaddr_in_t server_address;
     unsigned int bytes_read;
-
     char buf[BUF_SIZE];
 
+    char server_address_string[16];
+    int port = get_port(argc, argv);
+    set_address(argc, argv, server_address_string, LENGTH_OF(server_address_string));
+    printf("Listening on %s:%d\n",
+            server_address_string, port);
 
     // AF_INET: IPv4 internet protocols,
     // SOCK_STREAM: sequenced two-way byte streams
@@ -44,11 +50,12 @@ int main(int argc, char *argv[])
     // s_addr: address in network,
     // INADDR_ANY: bound soc to all local interfaces,
     // htonl: converts uint host to network bytes order
-    server_address.sin_addr.s_addr = htonl(INADDR_ANY);
+    /* server_address.sin_addr.s_addr = htonl(inaddr_any); */
+    server_address.sin_addr.s_addr = inet_addr(server_address_string);
 
     // sin_port: port(network byte order)
     // htons: converts ushort host to network bytes order
-    server_address.sin_port = htons(SERV_PORT);
+    server_address.sin_port = htons(port);
     bind(server_fd, (sockaddr_t *) &server_address, sizeof(sockaddr_in_t));
 
     // Create requests queue, suspend socket
@@ -71,23 +78,24 @@ int main(int argc, char *argv[])
         close(client_fd);
     }
 
-    /* while(true) { */
-    /*     switch(read_command()) { */
-    /*         case CMD_UNKNOWN: */
-    /*             break; */
-    /*         case CMD_ECHO: */
-    /*             printf("echo\n"); */
-    /*             break; */
-    /*         case CMD_TIME: */
-    /*             printf("time\n"); */
-    /*             break; */
-    /*         case CMD_CLOSE: */
-    /*             printf("close\n"); */
-    /*             break; */
-    /*         default: */
-    /*             break; */
-    /*     } */
-    /* } */
-
     return EXIT_SUCCESS;
 }
+
+void set_address(int argc, char *argv[], char *destination, size_t len)
+{
+    if(argc >= 2) {
+        strncpy(destination, argv[1], len);
+    } else {
+        strncpy(destination, "localhost", len);
+    }
+}
+
+int get_port(int argc, char *argv[])
+{
+    if(argc >= 3) {
+        return strtol(argv[1], NULL, 10);
+    } else {
+        return 6000;
+    }
+}
+
