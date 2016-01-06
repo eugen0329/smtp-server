@@ -14,7 +14,7 @@
 #define SERV_PORT 5555
 #define SERV_QUEUE_LEN 1
 #define BUF_SIZE 1024
-#define WONG_SOC(soc_fd) (soc_fd < 0)
+#define WRONG_SOC(soc_fd) (soc_fd < 0)
 #define EMPTY_FLAGS 0
 
 typedef int socket_t;
@@ -58,14 +58,14 @@ int main(int argc, char *argv[])
         // $2: client_addr, $3: client_addr_len
         client_fd = accept(server_fd, (sockaddr_t *) 0, NULL);
         if(WRONG_SOC(client_fd)) {
-            perrror("accept");
+            perror("accept");
             exit(EXIT_FAILURE);
         }
 
         while(1) {
             bytes_read = recv(client_fd, buf, BUF_SIZE, EMPTY_FLAGS);
             if(bytes_read <= 0) break;
-            send(client_sock, buf, bytes_read, EMPTY_FLAGS);
+            send(client_fd, buf, bytes_read, EMPTY_FLAGS);
         }
 
         close(client_fd);
