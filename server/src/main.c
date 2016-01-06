@@ -71,14 +71,19 @@ int main(int argc, char *argv[])
             perror("accept");
             exit(EXIT_FAILURE);
         }
+        printf("Accepted clinet:\n");
 
         while(true) {
-            bytes_read = recv(client_fd, buf, BUF_SIZE, EMPTY_FLAGS);
+            bytes_read = recv(client_fd, buf, BUF_SIZE - 1, EMPTY_FLAGS);
             if(bytes_read <= 0) break;
+            buf[bytes_read] = '\0';
             send(client_fd, buf, bytes_read, EMPTY_FLAGS);
+            printf("%s\n", buf);
+            printf("\n --- %d bytes read\n", bytes_read);
         }
 
         close(client_fd);
+        printf("Close client fd\n");
     }
 
     return EXIT_SUCCESS;
@@ -96,7 +101,7 @@ void set_address(int argc, char *argv[], char *destination, size_t len)
 int get_port(int argc, char *argv[])
 {
     if(argc >= 3) {
-        return strtol(argv[1], NULL, 10);
+        return strtol(argv[2], NULL, 10);
     } else {
         return DEFAULT_PORT;
     }

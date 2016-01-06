@@ -24,6 +24,7 @@ int main(int argc, char *argv[])
     struct sockaddr_in addr;
     int port = get_port(argc, argv);
     char server_address_string[16];
+    char buf[256];
     set_address(argc, argv, server_address_string, LENGTH_OF(server_address_string));
 
     printf(" %s:%d\n",
@@ -44,8 +45,15 @@ int main(int argc, char *argv[])
         exit(2);
     }
 
-    send(sock, message, sizeof(message), 0);
-    recv(sock, buf, sizeof(message), 0);
+    while(true) {
+        read_stdin(buf, LENGTH_OF(buf));
+        if(!strncmp(buf, "exit", LENGTH_OF(buf))) {
+            break;
+        }
+        send(sock, buf, strlen(buf), 0);
+        recv(sock, buf, strlen(buf), 0);
+        puts(buf);
+    }
 
     /* printf(buf); */
     close(sock);
@@ -65,7 +73,7 @@ void set_address(int argc, char *argv[], char *destination, size_t len)
 int get_port(int argc, char *argv[])
 {
     if(argc >= 3) {
-        return strtol(argv[1], NULL, 10);
+        return strtol(argv[2], NULL, 10);
     } else {
         return DEFAULT_PORT;
     }
