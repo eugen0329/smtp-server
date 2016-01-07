@@ -51,12 +51,12 @@ void print_and_send_file_info(int client_fd, char* filename, int fsize) {
     sprintf(file_size_msg, "%s %s", "File name: ", filename);
     sprintf(file_name_msg, "%s %d", "File size: ", fsize);
 
+    printf("%s\n", file_size_msg);
+    printf("%s\n", file_name_msg);
+
     send(client_fd, file_name_msg, strlen(file_name_msg), EMPTY_FLAGS);
-
     delay(150);
-
     send(client_fd, file_size_msg, strlen(file_size_msg), EMPTY_FLAGS);
-
     delay(150);
 }
 
