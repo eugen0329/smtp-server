@@ -10,6 +10,7 @@
 #define SIZE_OF(STATIC_COLLECTION) COUNT_OF(STATIC_COLLECTION)
 #define LENGTH_OF(STATIC_COLLECTION) COUNT_OF(STATIC_COLLECTION)
 #define EMPTY_FLAGS 0
+#define BUF_SIZE 2304
 
 unsigned char read_stdin(char* buf, size_t buflen);
 

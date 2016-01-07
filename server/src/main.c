@@ -16,7 +16,6 @@
 
 #define SOC_ERR -1
 #define SERV_QUEUE_LEN 1
-#define BUF_SIZE 1024
 #define WRONG_SOC(soc_fd) (soc_fd < 0)
 #define UNKNOWN_COMMAND_ERR "Unknown command"
 #define EMPTY_ECHO_ERR "Empty echo string"
