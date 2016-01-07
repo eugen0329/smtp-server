@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
     while(repeat) {
         printf("-> ");
         read_stdin(buf, LENGTH_OF(buf));
-        if(strlen(buf) <= 0) continue;
+        if(strlen(buf) == 0) continue;
         if(!strncmp(buf, "close", LENGTH_OF(buf))) repeat = 0;
         send(sock, buf, strlen(buf), 0);
         bytes_read = recv(sock, buf, LENGTH_OF(buf), 0);
