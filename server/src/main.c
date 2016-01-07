@@ -10,19 +10,15 @@
 #include <netinet/in.h>
 
 #include "util.h"
-#include "tui.h"
 
 #define DEFAULT_PORT 6000
 #define DEFAULT_ADDRESS "127.0.0.1"
 
 #define SOC_ERR -1
 #define SERV_QUEUE_LEN 1
-#define BUF_SIZE 1024
 #define WRONG_SOC(soc_fd) (soc_fd < 0)
 #define UNKNOWN_COMMAND_ERR "Unknown command"
 #define EMPTY_ECHO_ERR "Empty echo string"
-#define NO_ENTRY_ERR "No such entry"
-#define NO_MEM_ERR "Not enough memory"
 
 typedef int socket_t;
 typedef struct sockaddr_in sockaddr_in_t;
@@ -96,6 +92,8 @@ int main(int argc, char *argv[])
                 server_time_route(client_fd, buf, bytes_read);
             } else if(strstr(buf, "echo")) {
                 echo_route(client_fd, buf, bytes_read);
+            } else if(strstr(buf, "download")) {
+                download_route(client_fd, buf, bytes_read);
             } else if(!strncmp(buf, "close", LENGTH_OF(buf))) {
                 close_route(client_fd, buf, bytes_read);
                 break;
@@ -114,17 +112,8 @@ int main(int argc, char *argv[])
 
 void download_route(int client_fd, char *buf, size_t bytes_read)
 {
-    int rval = send_file(client_fd, "a.pdf");
-    switch(rval) {
-        case ENOENT:
-            printf("-> %s (%zu bytes)\n", NO_ENTRY_ERR, strlen(NO_ENTRY_ERR));
-            send(client_fd, NO_ENTRY_ERR, strlen(NO_ENTRY_ERR), EMPTY_FLAGS);
-            break;
-        case ENOMEM:
-            printf("-> %s (%zu bytes)\n", NO_MEM_ERR, strlen(NO_MEM_ERR));
-            send(client_fd, NO_MEM_ERR, strlen(NO_MEM_ERR), EMPTY_FLAGS);
-            break;
-    }
+    // TODO: buf parsing
+    send_file(client_fd, "a.pdf");
 }
 
 void close_route(int client_fd, char *buf, size_t bytes_read)

@@ -9,3 +9,11 @@ unsigned char read_stdin(char* buf, size_t buflen)
     }
     return EXIT_SUCCESS;
 }
+
+void delay(int ms) {
+  #ifdef __linux__
+      usleep(150);
+  #elif WIN32
+      Sleep(150);
+  #endif
+}
