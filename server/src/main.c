@@ -10,7 +10,6 @@
 #include <netinet/in.h>
 
 #include "util.h"
-#include "tui.h"
 
 #define DEFAULT_PORT 6000
 #define DEFAULT_ADDRESS "127.0.0.1"
