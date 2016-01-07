@@ -8,6 +8,13 @@ int send_file(int soc, char *filename)
     FILE *f;
 
     if((f = fopen(filename, "rb")) == NULL) return ENOENT;
+
+    // SOL_SOCKET: set options at the SOcket Level
+    setsockopt(soc, SOL_SOCKET, SO_SNDBUF, bufsize, sizeof(bufsize));
+    bufsize = getsockopt(soc, SOL_SOCKET, SO_SNDBUF, sizeof(bufsize));
+#ifdef WIN32
+    bufsize /= 2;
+#endif
     if((buf = malloc(bufsize)) == NULL) return ENOMEM;
 
     fseek(f, 0, SEEK_END); // seek to end of file
