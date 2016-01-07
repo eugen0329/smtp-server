@@ -36,6 +36,8 @@ void server_time_route(int client_fd, char *buf, size_t bytes_read);
 void error_route(int client_fd, char *buf, size_t bytes_read);
 void echo_route(int client_fd, char *buf, size_t bytes_read);
 
+void close_route(int client_fd, char *buf, size_t bytes_read);
+
 int main(int argc, char *argv[])
 {
     socket_t server_fd, client_fd;
@@ -92,10 +94,12 @@ int main(int argc, char *argv[])
                 server_time_route(client_fd, buf, bytes_read);
             } else if(strstr(buf, "echo")) {
                 echo_route(client_fd, buf, bytes_read);
+            } else if(!strncmp(buf, "close", LENGTH_OF(buf))) {
+                close_route(client_fd, buf, bytes_read);
+                break;
             } else {
                 error_route(client_fd, buf, bytes_read);
             }
-            puts("");
         }
 
         close(client_fd);
@@ -105,22 +109,29 @@ int main(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
+void close_route(int client_fd, char *buf, size_t bytes_read)
+{
+    char msg[] = "Connection is closed";
+    printf("-> %s (%zu bytes)\n", msg, strlen(msg));
+    send(client_fd, msg, strlen(msg), EMPTY_FLAGS);
+}
+
 void echo_route(int client_fd, char *buf, size_t bytes_read)
 {
     char *p = strstr(buf, "echo");
     p += LENGTH_OF("echo") - 1;
     if(strlen(p)) {
-        printf("-> %s (%zu bytes)", p, strlen(p));
+        printf("-> %s (%zu bytes)\n", p, strlen(p));
         send(client_fd, p, strlen(p), EMPTY_FLAGS);
     } else {
-        printf("-> %s (%zu bytes)", EMPTY_ECHO_ERR, sizeof(EMPTY_ECHO_ERR));
+        printf("-> %s (%zu bytes)\n", EMPTY_ECHO_ERR, sizeof(EMPTY_ECHO_ERR));
         send(client_fd, EMPTY_ECHO_ERR, strlen(EMPTY_ECHO_ERR), EMPTY_FLAGS);
     }
 }
 
 void error_route(int client_fd, char *buf, size_t bytes_read)
 {
-    printf("-> %s (%zu bytes)", UNKNOWN_COMMAND_ERR, sizeof(UNKNOWN_COMMAND_ERR));
+    printf("-> %s (%zu bytes)\n", UNKNOWN_COMMAND_ERR, sizeof(UNKNOWN_COMMAND_ERR));
     send(client_fd, UNKNOWN_COMMAND_ERR, strlen(UNKNOWN_COMMAND_ERR), EMPTY_FLAGS);
 }
 
@@ -129,7 +140,7 @@ void server_time_route(int client_fd, char *buf, size_t bytes_read)
     char *time_str;
     time_str = server_time();
     time_str[strlen(time_str) - 1] = '\0';
-    printf("-> %s (%zu bytes)", time_str, strlen(time_str));
+    printf("-> %s (%zu bytes)\n", time_str, strlen(time_str));
     send(client_fd, time_str, strlen(time_str), EMPTY_FLAGS);
 }
 

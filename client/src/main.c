@@ -26,9 +26,10 @@ int main(int argc, char *argv[])
     int port = get_port(argc, argv);
     char server_address_string[16];
     char buf[256];
+    char repeat = 1;
     set_address(argc, argv, server_address_string, LENGTH_OF(server_address_string));
 
-    printf(" %s:%d\n",
+    printf("%s:%d\n",
             server_address_string, port);
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -46,19 +47,17 @@ int main(int argc, char *argv[])
         exit(2);
     }
 
-    while(true) {
+    while(repeat) {
         printf("-> ");
         read_stdin(buf, LENGTH_OF(buf));
-        if(!strncmp(buf, "exit", LENGTH_OF(buf))) {
-            break;
-        }
+        if(strlen(buf) <= 0) continue;
+        if(!strncmp(buf, "close", LENGTH_OF(buf))) repeat = 0;
         send(sock, buf, strlen(buf), 0);
         bytes_read = recv(sock, buf, LENGTH_OF(buf), 0);
         buf[bytes_read] = '\0';
-        printf("<- %s", buf);
+        printf("<- %s\n", buf);
     }
 
-    /* printf(buf); */
     close(sock);
 
     return 0;
