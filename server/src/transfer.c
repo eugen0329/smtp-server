@@ -10,7 +10,7 @@ int send_file(int soc, char *filename)
     if((f = fopen(filename, "rb")) == NULL) return ENOENT;
 
     // SOL_SOCKET: set options at the SOcket Level
-    setsockopt(soc, SOL_SOCKET, SO_SNDBUF, bufsize, sizeof(bufsize));
+    setsockopt(soc, SOL_SOCKET, SO_SNDBUF, &bufsize, sizeof(bufsize));
     bufsize = getsockopt(soc, SOL_SOCKET, SO_SNDBUF, sizeof(bufsize));
 #ifdef WIN32
     bufsize /= 2;
