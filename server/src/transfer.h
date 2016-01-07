@@ -16,6 +16,7 @@ void send_file(int client_fd, char *filename);
 void no_file_error(int client_fd);
 void no_mem_error(int client_fd);
 void send_flag(int client_fd, char* flag);
-void print_and_send_file_info(int client_fd, char* filename, int fsize);
+void print_file_info(char* filename, int fsize, int bufsize);
+void send_file_info(int client_fd, char* filename, int fsize, int bufsize);
 
 #endif /* end of include guard: TRANSFER_H_8EOXMTNZ */

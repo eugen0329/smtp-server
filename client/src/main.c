@@ -19,7 +19,7 @@ int get_port(int argc, char *argv[]);
 void set_address(int argc, char *argv[], char *destination, size_t len);
 void receive_and_print_msg(int sock);
 void receive_file(int sock);
-int receive_ack(int sock);
+int receive_int(int sock);
 
 int main(int argc, char *argv[])
 {
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
         send(sock, buf, strlen(buf), EMPTY_FLAGS);
 
         // download file if its exists
-        if(strstr(buf, "download") && receive_ack(sock)) {
+        if(strstr(buf, "download") && receive_int(sock)) {
             receive_file(sock);
         }
 
@@ -70,17 +70,31 @@ int main(int argc, char *argv[])
 }
 
 void receive_file(int sock) {
-    //print file name
-    receive_and_print_msg(sock);
+    FILE *f;
+    char file_name[BUF_SIZE];
+    int file_size, buf_size;
 
-    //print file size
-    receive_and_print_msg(sock);
+    //receive file name
+    recv(sock, file_name, LENGTH_OF(file_name), 0);
+    //receive file size
+    file_size = receive_int(sock);
+    //receive buf size
+    buf_size = receive_int(sock);
+
+    print_file_info(file_name, file_size, buf_size);
+
+    // if((f = fopen(filename, 'wb')) == NULL) {
+    //     printf("Can't create file\n");
+    //     return;
+    // }
 }
 
-int receive_ack(int sock) {
-    char buf[1];
+int receive_int(int sock) {
+    unsigned int bytes_read;
+    char buf[BUF_SIZE];
 
-    recv(sock, buf, LENGTH_OF(buf), 0);
+    bytes_read = recv(sock, buf, LENGTH_OF(buf), 0);
+    buf[bytes_read] = '\0';
 
     return atoi(buf);
 }
@@ -91,6 +105,7 @@ void receive_and_print_msg(int sock) {
 
     bytes_read = recv(sock, buf, LENGTH_OF(buf), 0);
     buf[bytes_read] = '\0';
+
     printf("<- %s\n", buf);
 }
 

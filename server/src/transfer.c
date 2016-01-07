@@ -37,7 +37,8 @@ void send_file(int client_fd, char *filename)
     fsize = ftell(f); // get current file pointer
     fseek(f, 0, SEEK_SET); // seek back to beginning of file
 
-    print_and_send_file_info(client_fd, filename, fsize);
+    print_file_info(filename, fsize, bufsize);
+    send_file_info(client_fd, filename, fsize, bufsize);
 
     do {
         bytes_read = fread(buf, 1, bufsize, f);
@@ -45,18 +46,17 @@ void send_file(int client_fd, char *filename)
     } while(bytes_read >= bufsize - 1);
 }
 
-void print_and_send_file_info(int client_fd, char* filename, int fsize) {
-    char file_size_msg[BUF_SIZE], file_name_msg[BUF_SIZE];
+void send_file_info(int client_fd, char* filename, int fsize, int bufsize) {
+    char file_size_str[BUF_SIZE], buf_size_str[BUF_SIZE];
 
-    sprintf(file_size_msg, "%s %s", "File name: ", filename);
-    sprintf(file_name_msg, "%s %d", "File size: ", fsize);
+    sprintf(file_size_str, "%d", fsize);
+    sprintf(buf_size_str, "%d", bufsize);
 
-    printf("%s\n", file_size_msg);
-    printf("%s\n", file_name_msg);
-
-    send(client_fd, file_name_msg, strlen(file_name_msg), EMPTY_FLAGS);
+    send(client_fd, filename, strlen(filename), EMPTY_FLAGS);
     delay(150);
-    send(client_fd, file_size_msg, strlen(file_size_msg), EMPTY_FLAGS);
+    send(client_fd, file_size_str, strlen(file_size_str), EMPTY_FLAGS);
+    delay(150);
+    send(client_fd, buf_size_str, strlen(buf_size_str), EMPTY_FLAGS);
     delay(150);
 }
 
