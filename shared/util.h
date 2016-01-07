@@ -1,6 +1,12 @@
 #ifndef UTIL_H_RMKDBCTA
 #define UTIL_H_RMKDBCTA
 
+#ifdef __linux__
+  #include <unistd.h>
+#elif WIN32
+  #include <windows.h>
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

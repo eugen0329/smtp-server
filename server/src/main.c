@@ -19,8 +19,6 @@
 #define WRONG_SOC(soc_fd) (soc_fd < 0)
 #define UNKNOWN_COMMAND_ERR "Unknown command"
 #define EMPTY_ECHO_ERR "Empty echo string"
-#define NO_ENTRY_ERR "No such file"
-#define NO_MEM_ERR "Not enough memory"
 
 typedef int socket_t;
 typedef struct sockaddr_in sockaddr_in_t;
@@ -115,17 +113,7 @@ int main(int argc, char *argv[])
 void download_route(int client_fd, char *buf, size_t bytes_read)
 {
     // TODO: buf parsing
-    int rval = send_file(client_fd, "a.pdf");
-    switch(rval) {
-        case ENOENT:
-            printf("-> %s (%zu bytes)\n", NO_ENTRY_ERR, strlen(NO_ENTRY_ERR));
-            send(client_fd, NO_ENTRY_ERR, strlen(NO_ENTRY_ERR), EMPTY_FLAGS);
-            break;
-        case ENOMEM:
-            printf("-> %s (%zu bytes)\n", NO_MEM_ERR, strlen(NO_MEM_ERR));
-            send(client_fd, NO_MEM_ERR, strlen(NO_MEM_ERR), EMPTY_FLAGS);
-            break;
-    }
+    send_file(client_fd, "a.pdf");
 }
 
 void close_route(int client_fd, char *buf, size_t bytes_read)
