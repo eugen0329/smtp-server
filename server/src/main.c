@@ -105,6 +105,7 @@ int main(int argc, char *argv[])
         close(client_fd);
         printf("Close client fd\n");
     }
+    close(server_fd);
 
     return EXIT_SUCCESS;
 }
