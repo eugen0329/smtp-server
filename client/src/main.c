@@ -29,12 +29,11 @@ int main(int argc, char *argv[])
     char server_address_string[16];
     char buf[BUF_SIZE];
     char repeat = 1;
+    int id = rand();
     set_address(argc, argv, server_address_string, LENGTH_OF(server_address_string));
 
-    printf("%s:%d\n", server_address_string, port);
-
     sock = socket(AF_INET, SOCK_STREAM, 0);
-    if(sock < 0) {
+    if(WRONG_SOC(sock)) {
         perror("socket");
         exit(1);
     }
@@ -47,6 +46,10 @@ int main(int argc, char *argv[])
         perror("connect");
         exit(2);
     }
+
+    printf("%s:%d, ID: %d\n", server_address_string, port, id);
+
+    send(sock, &id, sizeof(id), EMPTY_FLAGS);
 
     while(repeat) {
         printf("-> ");

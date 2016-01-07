@@ -16,7 +16,6 @@
 
 #define SOC_ERR -1
 #define SERV_QUEUE_LEN 1
-#define WRONG_SOC(soc_fd) (soc_fd < 0)
 #define UNKNOWN_COMMAND_ERR "Unknown command"
 #define EMPTY_ECHO_ERR "Empty echo string"
 
@@ -42,6 +41,7 @@ int main(int argc, char *argv[])
     sockaddr_in_t server_address;
     unsigned int bytes_read;
     char buf[BUF_SIZE];
+    int id;
 
     char server_address_string[16];
     int port = get_port(argc, argv);
@@ -80,7 +80,8 @@ int main(int argc, char *argv[])
             perror("accept");
             exit(EXIT_FAILURE);
         }
-        printf("Accepted clinet:\n");
+        recv(client_fd, &id, sizeof(id), EMPTY_FLAGS);
+        printf("Accepted clinet %d:\n", id);
 
         while(true) {
             bytes_read = recv(client_fd, buf, BUF_SIZE - 1, EMPTY_FLAGS);

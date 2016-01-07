@@ -34,7 +34,7 @@ void send_file(int client_fd, char *filename)
     send_flag(client_fd, ACK);
 
     fseek(f, 0, SEEK_END); // seek to end of file
-    fsize = ftell(f); // get current file pointer
+    fsize = ftell(f);      // get byte position (actual file_size)
     fseek(f, 0, SEEK_SET); // seek back to beginning of file
 
     print_and_send_file_info(client_fd, filename, fsize);
