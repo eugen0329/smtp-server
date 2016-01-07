@@ -37,8 +37,7 @@ void send_file(int client_fd, char *filename)
     fsize = ftell(f); // get current file pointer
     fseek(f, 0, SEEK_SET); // seek back to beginning of file
 
-    printf("File name: %s\n", filename);
-    printf("File size: %i\n", fsize);
+    print_and_send_file_info(client_fd, filename, fsize);
 
     do {
         bytes_read = fread(buf, 1, bufsize, f);
@@ -46,21 +45,27 @@ void send_file(int client_fd, char *filename)
     } while(bytes_read >= bufsize - 1);
 }
 
+void print_and_send_file_info(int client_fd, char* filename, int fsize) {
+    char file_size_msg[BUF_SIZE], file_name_msg[BUF_SIZE];
+
+    sprintf(file_size_msg, "%s %s", "File name: ", filename);
+    sprintf(file_name_msg, "%s %d", "File size: ", fsize);
+
+    send(client_fd, file_name_msg, strlen(file_name_msg), EMPTY_FLAGS);
+
+    delay(150);
+
+    send(client_fd, file_size_msg, strlen(file_size_msg), EMPTY_FLAGS);
+
+    delay(150);
+}
+
 void send_flag(int client_fd, char* flag) {
     send(client_fd, flag, strlen(flag), EMPTY_FLAGS);
 
     // add sleep for sending delay
-#ifdef __linux__
-    usleep(150);
-#elif WIN32
-    Sleep(150);
-#endif
+    delay(150);
 }
-
-// void send_ack(int client_fd) {
-//     send(client_fd, ACK, strlen(ACK), EMPTY_FLAGS);
-
-// }
 
 void no_file_error(int client_fd) {
     send_flag(client_fd, ERROR);

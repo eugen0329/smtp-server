@@ -21,7 +21,7 @@ void receive_and_print_msg(int sock);
 void receive_file(int sock);
 int receive_ack(int sock);
 
-int main (int argc, char *argv[])
+int main(int argc, char *argv[])
 {
     int sock;
     struct sockaddr_in addr;
@@ -53,7 +53,7 @@ int main (int argc, char *argv[])
         read_stdin(buf, LENGTH_OF(buf));
         if(strlen(buf) == 0) continue;
         if(!strncmp(buf, "close", LENGTH_OF(buf))) repeat = 0;
-        send(sock, buf, strlen(buf), 0);
+        send(sock, buf, strlen(buf), EMPTY_FLAGS);
 
         // download file if its exists
         if(strstr(buf, "download") && receive_ack(sock)) {
@@ -70,7 +70,11 @@ int main (int argc, char *argv[])
 }
 
 void receive_file(int sock) {
-    printf("file\n");
+    //print file name
+    receive_and_print_msg(sock);
+
+    //print file size
+    receive_and_print_msg(sock);
 }
 
 int receive_ack(int sock) {

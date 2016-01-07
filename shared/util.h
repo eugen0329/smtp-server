@@ -19,6 +19,7 @@
 #define BUF_SIZE 2304
 
 unsigned char read_stdin(char* buf, size_t buflen);
+void delay(int ms);
 
 #endif /* end of include guard: UTIL_H_RMKDBCTA */
 
