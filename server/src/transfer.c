@@ -4,17 +4,23 @@
 int send_file(int soc, char *filename)
 {
     void *buf;
-    size_t bytes_read, fsize;
-    socklen_t bufsize = 512;
+    socklen_t optlen;
+    size_t bytes_read, fsize, bufsize = BUF_SIZE;
     FILE *f;
 
     if((f = fopen(filename, "rb")) == NULL) return ENOENT;
 
     // SOL_SOCKET: set options at the SOcket Level
-    setsockopt(soc, SOL_SOCKET, SO_SNDBUF, &bufsize, sizeof(bufsize));
-    bufsize = getsockopt(soc, SOL_SOCKET, SO_SNDBUF, buf, sizeof(bufsize));
 
-#ifdef WIN32
+    // Set buffer size
+    setsockopt(soc, SOL_SOCKET, SO_SNDBUF, &bufsize, sizeof(bufsize));
+
+    // Get buffer size and write it to bufsize
+    optlen = sizeof(bufsize);
+    getsockopt(soc, SOL_SOCKET, SO_SNDBUF, &bufsize, &optlen);
+
+    // kernel needs harf of the buf size
+#ifdef __linux__
     bufsize /= 2;
 #endif
 
