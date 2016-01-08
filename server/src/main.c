@@ -4,6 +4,7 @@
 #include <string.h>
 #include <time.h>
 #include <errno.h>
+#include "transfer.h"
 
 #include <unistd.h>
 #include <sys/socket.h>
@@ -18,6 +19,7 @@
 #define SERV_QUEUE_LEN 1
 #define UNKNOWN_COMMAND_ERR "Unknown command"
 #define EMPTY_ECHO_ERR "Empty echo string"
+#define EMPTY_NAME_ERR "Empty file name"
 
 typedef int socket_t;
 typedef struct sockaddr_in sockaddr_in_t;
@@ -113,8 +115,17 @@ int main(int argc, char *argv[])
 
 void download_route(int client_fd, char *buf, size_t bytes_read)
 {
-    // TODO: buf parsing
-    send_file(client_fd, "a.pdf");
+    char *file_name = strstr(buf, "download");
+    file_name += LENGTH_OF("download") - 1;
+    if (file_name[0] == ' ') memmove(file_name, file_name + 1, strlen(file_name));
+    if(strlen(file_name)) {
+        send_file(client_fd, file_name);
+    } else {
+        printf("-> %s (%zu bytes)\n", EMPTY_NAME_ERR, sizeof(EMPTY_NAME_ERR));
+
+        send_to(client_fd, ERROR);
+        send_to(client_fd, EMPTY_NAME_ERR);
+    }
 }
 
 void close_route(int client_fd, char *buf, size_t bytes_read)

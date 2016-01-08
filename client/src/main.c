@@ -11,6 +11,7 @@
 
 #define DEFAULT_PORT     6000
 #define DEFAULT_ADDRESS "127.0.0.1"
+#define FILE_DOWNLOADED_MSG "File downloaded"
 
 char message[] = "Hello there!\n";
 char buf[sizeof(message)];
@@ -19,7 +20,7 @@ int get_port(int argc, char *argv[]);
 void set_address(int argc, char *argv[], char *destination, size_t len);
 void receive_and_print_msg(int sock);
 void receive_file(int sock);
-int receive_ack(int sock);
+int receive_int(int sock);
 
 int main(int argc, char *argv[])
 {
@@ -56,14 +57,17 @@ int main(int argc, char *argv[])
         read_stdin(buf, LENGTH_OF(buf));
         if(strlen(buf) == 0) continue;
         if(!strncmp(buf, "close", LENGTH_OF(buf))) repeat = 0;
-        send(sock, buf, strlen(buf), EMPTY_FLAGS);
+        send_to(sock, buf);
 
         // download file if its exists
-        if(strstr(buf, "download") && receive_ack(sock)) {
+        if(strstr(buf, "download") && receive_int(sock)) {
             receive_file(sock);
+
+            printf("%s\n", FILE_DOWNLOADED_MSG);
+            continue;
         }
 
-        //prints info or error mesages
+        // prints info or error mesages
         receive_and_print_msg(sock);
     }
 
@@ -73,17 +77,54 @@ int main(int argc, char *argv[])
 }
 
 void receive_file(int sock) {
-    //print file name
-    receive_and_print_msg(sock);
+    char file_name[BUF_SIZE];
+    int file_size, buf_size, bytes, readed_bytes = 0;
+    FILE *f;
 
-    //print file size
-    receive_and_print_msg(sock);
+    //receive file name
+    readed_bytes = recv(sock, file_name, LENGTH_OF(file_name), 0);
+    file_name[readed_bytes] = '\0';
+    //receive file size
+    file_size = receive_int(sock);
+    //receive buf size
+    buf_size = receive_int(sock);
+
+    print_file_info(file_name, file_size, buf_size);
+
+    if((f = fopen(file_name, "wb")) == NULL) {
+        printf("Can't create file\n");
+        return;
+    }
+
+    char buf[buf_size];
+
+    do {
+        bytes = recv(sock, buf, LENGTH_OF(buf), 0);
+        printf("%i\n", bytes);
+
+        // if last package
+        if(bytes < buf_size - 1){
+            char new_buf[bytes];
+            strncpy(new_buf, buf, bytes);
+            new_buf[bytes] = '\0';
+            fprintf(f, "%s", new_buf);
+        } else {
+            fprintf(f, "%s", buf);
+            fseek(f, readed_bytes, SEEK_SET);
+        }
+        readed_bytes += bytes;
+        printf("%i\n", readed_bytes);
+    } while(bytes >= buf_size - 1);
+
+    fclose(f);
 }
 
-int receive_ack(int sock) {
-    char buf[1];
+int receive_int(int sock) {
+    unsigned int bytes_read;
+    char buf[BUF_SIZE];
 
-    recv(sock, buf, LENGTH_OF(buf), 0);
+    bytes_read = recv(sock, buf, LENGTH_OF(buf), 0);
+    buf[bytes_read] = '\0';
 
     return atoi(buf);
 }
@@ -94,6 +135,7 @@ void receive_and_print_msg(int sock) {
 
     bytes_read = recv(sock, buf, LENGTH_OF(buf), 0);
     buf[bytes_read] = '\0';
+
     printf("<- %s\n", buf);
 }
 

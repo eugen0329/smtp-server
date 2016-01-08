@@ -11,9 +11,25 @@ unsigned char read_stdin(char* buf, size_t buflen)
 }
 
 void delay(int ms) {
-  #ifdef __linux__
-      usleep(150);
-  #elif WIN32
-      Sleep(150);
-  #endif
+    #ifdef __linux__
+        usleep(ms);
+    #elif WIN32
+        Sleep(ms);
+    #endif
+}
+
+void print_file_info(char* filename, int fsize, int bufsize) {
+    char file_size_msg[BUF_SIZE], file_name_msg[BUF_SIZE], buf_size_msg[BUF_SIZE];
+
+    sprintf(file_size_msg, "%s %s", "File name: ", filename);
+    sprintf(file_name_msg, "%s %d", "File size: ", fsize);
+    sprintf(buf_size_msg,  "%s %d", "Buf size: ",  bufsize);
+
+    printf("%s\n%s\n%s\n", file_size_msg, file_name_msg, buf_size_msg);
+}
+
+void send_to(int sock, char* text) {
+    send(sock, text, strlen(text), EMPTY_FLAGS);
+
+    delay(DELAY);
 }

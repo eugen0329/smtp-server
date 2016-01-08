@@ -31,52 +31,46 @@ void send_file(int client_fd, char *filename)
     }
 
     // send ack to client => he will start receiving file
-    send_flag(client_fd, ACK);
+    send_to(client_fd, ACK);
 
     fseek(f, 0, SEEK_END); // seek to end of file
     fsize = ftell(f);      // get byte position (actual file_size)
     fseek(f, 0, SEEK_SET); // seek back to beginning of file
 
-    print_and_send_file_info(client_fd, filename, fsize);
+    print_file_info(filename, fsize, bufsize);
+    send_file_info(client_fd, filename, fsize, bufsize);
 
     do {
         bytes_read = fread(buf, 1, bufsize, f);
         send(client_fd, buf, bytes_read, EMPTY_FLAGS);
     } while(bytes_read >= bufsize - 1);
+
+    fclose(f);
+
+    printf("%s\n", FILE_DOWNLOADED_MSG);
 }
 
-void print_and_send_file_info(int client_fd, char* filename, int fsize) {
-    char file_size_msg[BUF_SIZE], file_name_msg[BUF_SIZE];
+void send_file_info(int client_fd, char* filename, int fsize, int bufsize) {
+    char file_size_str[BUF_SIZE], buf_size_str[BUF_SIZE];
 
-    sprintf(file_size_msg, "%s %s", "File name: ", filename);
-    sprintf(file_name_msg, "%s %d", "File size: ", fsize);
+    sprintf(file_size_str, "%d", fsize);
+    sprintf(buf_size_str, "%d", bufsize);
 
-    printf("%s\n", file_size_msg);
-    printf("%s\n", file_name_msg);
-
-    send(client_fd, file_name_msg, strlen(file_name_msg), EMPTY_FLAGS);
-    delay(150);
-    send(client_fd, file_size_msg, strlen(file_size_msg), EMPTY_FLAGS);
-    delay(150);
-}
-
-void send_flag(int client_fd, char* flag) {
-    send(client_fd, flag, strlen(flag), EMPTY_FLAGS);
-
-    // add sleep for sending delay
-    delay(150);
+    send_to(client_fd, filename);
+    send_to(client_fd, file_size_str);
+    send_to(client_fd, buf_size_str);
 }
 
 void no_file_error(int client_fd) {
-    send_flag(client_fd, ERROR);
+    send_to(client_fd, ERROR);
 
     printf("-> %s (%zu bytes)\n", NO_ENTRY_ERR, strlen(NO_ENTRY_ERR));
-    send(client_fd, NO_ENTRY_ERR, strlen(NO_ENTRY_ERR), EMPTY_FLAGS);
+    send_to(client_fd, NO_ENTRY_ERR);
 }
 
 void no_mem_error(int client_fd) {
-    send_flag(client_fd, ERROR);
+    send_to(client_fd, ERROR);
 
     printf("-> %s (%zu bytes)\n", NO_MEM_ERR, strlen(NO_MEM_ERR));
-    send(client_fd, NO_MEM_ERR, strlen(NO_MEM_ERR), EMPTY_FLAGS);
+    send_to(client_fd, NO_MEM_ERR);
 }
