@@ -30,8 +30,11 @@ int main(int argc, char *argv[])
     char server_address_string[16];
     char buf[BUF_SIZE];
     char repeat = 1;
-    int id = rand();
+    int id;
     set_address(argc, argv, server_address_string, LENGTH_OF(server_address_string));
+
+    srand(time(NULL));
+    id = rand();
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if(WRONG_SOC(sock)) {
