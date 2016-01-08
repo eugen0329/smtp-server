@@ -70,14 +70,13 @@ int main(int argc, char *argv[])
 }
 
 void receive_file(int sock) {
-    unsigned int bytes_read;
     char file_name[BUF_SIZE];
-    int file_size, buf_size;
+    int file_size, buf_size, bytes, readed_bytes = 0;
     FILE *f;
 
     //receive file name
-    bytes_read = recv(sock, file_name, LENGTH_OF(file_name), 0);
-    file_name[bytes_read] = '\0';
+    readed_bytes = recv(sock, file_name, LENGTH_OF(file_name), 0);
+    file_name[readed_bytes] = '\0';
     //receive file size
     file_size = receive_int(sock);
     //receive buf size
@@ -85,10 +84,27 @@ void receive_file(int sock) {
 
     print_file_info(file_name, file_size, buf_size);
 
-    // if((f = fopen(filename, 'wb')) == NULL) {
-    //     printf("Can't create file\n");
-    //     return;
-    // }
+    if((f = fopen(file_name, "wb")) == NULL) {
+        printf("Can't create file\n");
+        return;
+    }
+
+    char buf[buf_size];
+
+    do {
+        bytes = recv(sock, buf, LENGTH_OF(buf), 0);
+        // printf("%s\n", buf);
+        fprintf(f, "%s", buf);
+        fseek(f, readed_bytes, SEEK_SET);
+        readed_bytes += bytes;
+        // break;
+        // return;
+        // fseek(f, 0, SEEK_END);
+        // printf("write\n");
+        // bytes_readed += buf_size;
+    } while(bytes >= buf_size - 1);
+
+    fclose(f);
 }
 
 int receive_int(int sock) {
