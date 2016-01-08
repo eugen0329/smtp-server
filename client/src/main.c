@@ -11,6 +11,7 @@
 
 #define DEFAULT_PORT     6000
 #define DEFAULT_ADDRESS "127.0.0.1"
+#define FILE_DOWNLOADED_MSG "File downloaded"
 
 char message[] = "Hello there!\n";
 char buf[sizeof(message)];
@@ -58,9 +59,12 @@ int main(int argc, char *argv[])
         // download file if its exists
         if(strstr(buf, "download") && receive_int(sock)) {
             receive_file(sock);
+
+            printf("%s\n", FILE_DOWNLOADED_MSG);
+            continue;
         }
 
-        //prints info or error mesages
+        // prints info or error mesages
         receive_and_print_msg(sock);
     }
 
@@ -93,15 +97,20 @@ void receive_file(int sock) {
 
     do {
         bytes = recv(sock, buf, LENGTH_OF(buf), 0);
-        // printf("%s\n", buf);
-        fprintf(f, "%s", buf);
-        fseek(f, readed_bytes, SEEK_SET);
+        printf("%i\n", bytes);
+
+        // if last package
+        if(bytes < buf_size - 1){
+            char new_buf[bytes];
+            strncpy(new_buf, buf, bytes);
+            new_buf[bytes] = '\0';
+            fprintf(f, "%s", new_buf);
+        } else {
+            fprintf(f, "%s", buf);
+            fseek(f, readed_bytes, SEEK_SET);
+        }
         readed_bytes += bytes;
-        // break;
-        // return;
-        // fseek(f, 0, SEEK_END);
-        // printf("write\n");
-        // bytes_readed += buf_size;
+        printf("%i\n", readed_bytes);
     } while(bytes >= buf_size - 1);
 
     fclose(f);

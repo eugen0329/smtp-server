@@ -44,6 +44,10 @@ void send_file(int client_fd, char *filename)
         bytes_read = fread(buf, 1, bufsize, f);
         send(client_fd, buf, bytes_read, EMPTY_FLAGS);
     } while(bytes_read >= bufsize - 1);
+
+    fclose(f);
+
+    printf("%s\n", FILE_DOWNLOADED_MSG);
 }
 
 void send_file_info(int client_fd, char* filename, int fsize, int bufsize) {

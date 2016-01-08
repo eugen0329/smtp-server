@@ -5,6 +5,7 @@
 #define ERROR "0"
 #define NO_ENTRY_ERR "No such file"
 #define NO_MEM_ERR "Not enough memory"
+#define FILE_DOWNLOADED_MSG "File downloaded"
 
 #include <stdio.h>
 #include <errno.h>
