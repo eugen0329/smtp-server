@@ -4,7 +4,6 @@
 void send_file(int client_fd, char *filename)
 {
     void *buf;
-    socklen_t optlen;
     size_t bytes_read, fsize, bufsize = BUF_SIZE;
     FILE *f;
 
@@ -13,12 +12,8 @@ void send_file(int client_fd, char *filename)
         return;
     }
 
-    // SOL_SOCKET: set options at the SOcket Level(SO_SNDBUF - buf size)
-    setsockopt(client_fd, SOL_SOCKET, SO_SNDBUF, &bufsize, sizeof(bufsize));
-
-    // Get buffer size and write it to bufsize
-    optlen = sizeof(bufsize);
-    getsockopt(client_fd, SOL_SOCKET, SO_SNDBUF, &bufsize, &optlen);
+    set_buf_size(client_fd, bufsize);
+    bufsize = get_buf_size(client_fd);
 
     // kernel needs harf of the buf size
 #ifdef __linux__
@@ -48,6 +43,23 @@ void send_file(int client_fd, char *filename)
     fclose(f);
 
     printf("%s\n", FILE_DOWNLOADED_MSG);
+}
+
+
+size_t get_buf_size(int client_fd)
+{
+    socklen_t optlen;
+    size_t bufsize;
+    // Get buffer size and write it to bufsize
+    optlen = sizeof(bufsize);
+    getsockopt(client_fd, SOL_SOCKET, SO_SNDBUF, &bufsize, &optlen);
+    return bufsize;
+}
+
+void set_buf_size(int client_fd, size_t bufsize)
+{
+    // SOL_SOCKET: set options at the SOcket Level(SO_SNDBUF - buf size)
+    setsockopt(client_fd, SOL_SOCKET, SO_SNDBUF, &bufsize, sizeof(bufsize));
 }
 
 void send_file_info(int client_fd, char* filename, int fsize, int bufsize) {

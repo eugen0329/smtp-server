@@ -18,4 +18,8 @@ void no_file_error(int client_fd);
 void no_mem_error(int client_fd);
 void send_file_info(int client_fd, char* filename, int fsize, int bufsize);
 
+size_t get_buf_size(int client_fd);
+void set_buf_size(int client_fd, size_t bufsize);
+
+
 #endif /* end of include guard: TRANSFER_H_8EOXMTNZ */
