@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
         read_stdin(buf, LENGTH_OF(buf));
         if(strlen(buf) == 0) continue;
         if(!strncmp(buf, "close", LENGTH_OF(buf))) repeat = 0;
-        send(sock, buf, strlen(buf), EMPTY_FLAGS);
+        send_to(sock, buf);
 
         // download file if its exists
         if(strstr(buf, "download") && receive_int(sock)) {
@@ -70,12 +70,14 @@ int main(int argc, char *argv[])
 }
 
 void receive_file(int sock) {
-    FILE *f;
+    unsigned int bytes_read;
     char file_name[BUF_SIZE];
     int file_size, buf_size;
+    FILE *f;
 
     //receive file name
-    recv(sock, file_name, LENGTH_OF(file_name), 0);
+    bytes_read = recv(sock, file_name, LENGTH_OF(file_name), 0);
+    file_name[bytes_read] = '\0';
     //receive file size
     file_size = receive_int(sock);
     //receive buf size
